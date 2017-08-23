@@ -14,7 +14,8 @@
     "@theia/preferences": "^0.1.1",
     "@theia/python": "^0.1.1",
     "@theia/terminal": "^0.1.1",
-    "@theia/workspace": "^0.1.1"
+    "@theia/workspace": "^0.1.1",
+    "@theia/git": "^0.1.1"
   },
   "scripts": {
     "test": "electron-mocha --timeout 60000 --require ts-node/register test/**/*.espec.ts",
