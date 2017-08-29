@@ -7,11 +7,9 @@
 
 import { injectable, inject } from "inversify";
 import { ProtocolToMonacoConverter } from "monaco-languageclient/lib";
-import {
-    CommandHandler, CommandContribution, CommandRegistry, CommonCommands, SelectionService
-} from '@theia/core/lib/common';
+import { CommandHandler, CommandContribution, CommandRegistry, CommonCommands, SelectionService } from '@theia/core/lib/common';
 import { EditorManager, TextEditorSelection, SHOW_REFERENCES } from '@theia/editor/lib/browser';
-import { Position, Location } from "@theia/languages/lib/common"
+import { Position, Location } from "@theia/languages/lib/common";
 import { getCurrent, MonacoEditor } from './monaco-editor';
 import MenuRegistry = monaco.actions.MenuRegistry;
 import MenuId = monaco.actions.MenuId;
@@ -41,12 +39,16 @@ export class MonacoEditorCommandHandlers implements CommandContribution {
         });
 
         [CommonCommands.EDIT_UNDO, CommonCommands.EDIT_REDO].forEach(id => {
-            const doExecute = (editor: MonacoEditor, ...args: any[]): any => {
-                return editor.getControl().cursor.trigger('keyboard', id, args);
-            };
+            const doExecute = (editor: MonacoEditor, ...args: any[]): any => editor.getControl().cursor.trigger('keyboard', id, args);
             const handler = this.newClipboardHandler(id, doExecute);
             commands.registerHandler(id, handler);
         });
+
+        const findHandler = new EditorCommandHandler(CommonCommands.EDIT_FIND, this.editorManager, this.selectionService);
+        commands.registerHandler(CommonCommands.EDIT_FIND, findHandler);
+
+        const replaceHandler = new EditorCommandHandler(CommonCommands.EDIT_REPLACE, this.editorManager, this.selectionService);
+        commands.registerHandler(CommonCommands.EDIT_REPLACE, replaceHandler);
 
         for (const menuItem of MenuRegistry.getMenuItems(MenuId.EditorContext)) {
             const { id, title, iconClass } = menuItem.command;
@@ -86,12 +88,14 @@ export class EditorCommandHandler implements CommandHandler {
     }
 
     isVisible(): boolean {
-        return TextEditorSelection.is(this.selectionService.selection);
+        const r = TextEditorSelection.is(this.selectionService.selection);
+        return r;
     }
 
     isEnabled(): boolean {
         const editor = getCurrent(this.editorManager);
-        return !!editor && editor.isActionSupported(this.id);
+        const r = !!editor && editor.isActionSupported(this.id);
+        return r;
     }
 
 }
